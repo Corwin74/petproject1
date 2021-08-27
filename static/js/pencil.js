@@ -86,6 +86,12 @@ if(window.addEventListener) {
           func(ev);
         }
       }
+
+      // Clear function
+      function clear_canvas (ev) {
+        const context = ev.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+      }
     
       init();
     
