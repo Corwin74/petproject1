@@ -87,16 +87,18 @@ if(window.addEventListener) {
         }
       }
 
-      // Clear function
-      function clear_canvas (ev) {
-        const context = ev.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    
       init();
     
     }, false); }
     
+    
+// Clear function
+function clear_canvas () {
+  canvas = document.getElementById('imageView');
+  const context = canvas.getContext('2d');
+  context.clearRect(0, 0, canvas.width, canvas.height);
+}
+
     // vim:set spell spl=en fo=wan1croql tw=80 ts=2 sw=2 sts=2 sta et ai cin fenc=utf-8 ff=unix:
     
     
