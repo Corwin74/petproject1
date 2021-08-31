@@ -101,22 +101,19 @@ function clear_canvas () {
 
 
 //Send canvas
-function send_canvas () 
+function send_canvas () {
   canvas = document.getElementById('imageView');
   var dataURL = canvas.toDataURL();
   $.ajax({
     type: "POST",
     url: "https://shockland.ru/hook",
-    data:{
-    imageBase64: dataURL
-  }
+    data: {imageBase64: dataURL}
   }).done(function() {
   console.log('sent');
-});
+                      });
+}
 
 
 
+ // vim:set spell spl=en fo=wan1croql tw=80 ts=2 sw=2 sts=2 sta et ai cin fenc=utf-8 ff=unix:
 
-    // vim:set spell spl=en fo=wan1croql tw=80 ts=2 sw=2 sts=2 sta et ai cin fenc=utf-8 ff=unix:
-    
-    
