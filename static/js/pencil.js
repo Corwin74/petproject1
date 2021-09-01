@@ -26,7 +26,11 @@ if(window.addEventListener) {
           alert('Error: failed to getContext!');
           return;
         }
-    
+        // Fill
+
+        context.fillStyle = 'white';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
         // Pencil tool instance.
         tool = new tool_pencil();
     
@@ -103,7 +107,7 @@ function clear_canvas () {
 //Send canvas
 function send_canvas () {
   canvas = document.getElementById('imageView');
-  var dataURL = canvas.toDataURL();
+  var dataURL = canvas.toDataURL('image/jpeg', 1.0);
   $.ajax({
     type: "POST",
     url: "https://shockland.ru/hook",
