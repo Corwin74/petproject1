@@ -101,8 +101,9 @@ function clear_canvas () {
   canvas = document.getElementById('imageView');
   const context = canvas.getContext('2d');
   context.clearRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = 'white';
+  context.fillRect(0, 0, canvas.width, canvas.height);
 }
-
 
 //Send canvas
 function send_canvas () {
