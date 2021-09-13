@@ -1,9 +1,17 @@
 import cv2
 import numpy as np
-
+import os
 
 
 OPENCV_MAJOR_VERSION = int(cv2.__version__.split('.')[0])
+
+def padd_symbol(img):
+    max_size = max(img.shape)
+    canvas = np.zeros((max_size+10, max_size+10), np.uint8)
+    x = (max_size+10 - img.shape[0])//2
+    y = (max_size+10 - img.shape[1])//2
+    canvas[x:x+img.shape[0], y:y+img.shape[1]] = img
+    return cv2.resize(canvas, (28, 28))
 
 
 def inside(r1, r2):
@@ -12,57 +20,22 @@ def inside(r1, r2):
     return (x1 > x2) and (y1 > y2) and (x1+w1 < x2+w2) and \
             (y1+h1 < y2+h2)
 
-
-def wrap_digit(rect, img_w, img_h):
-
-    x, y, w, h = rect
-
-    x_center = x + w//2
-    y_center = y + h//2
-    if (h > w):
-        w = h
-        x = x_center - (w//2)
-    else:
-        h = w
-        y = y_center - (h//2)
-
-    padding = 5
-    x -= padding
-    y -= padding
-    w += 2 * padding
-    h += 2 * padding
-
-    if x < 0:
-        x = 0
-    elif x > img_w:
-        x = img_w
-
-    if y < 0:
-        y = 0
-    elif y > img_h:
-        y = img_h
-
-    if x+w > img_w:
-        w = img_w - x
-
-    if y+h > img_h:
-        h = img_h - y
-
-    return x, y, w, h
+def overlape(r1, r2):
+    x1, y1, w1, h1 = r1
+    x2, y2, w2, h2 = r2
+    if x1 > x2:
+        x1, x2 = x2, x1
+        w1, w2 = w2, w1
+    return x2 < x1 + w1//2
 
 
 
-img_path = "/home/alex/projects/opencv/canvas.png"
+img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'canvas.png')
 img = cv2.imread(img_path, cv2.IMREAD_COLOR)
 
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 cv2.GaussianBlur(gray, (7, 7), 0, gray)
-
-#ret, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
-thresh = gray
-erode_kernel = np.ones((3, 3), np.uint8)
-thresh = cv2.erode(thresh, erode_kernel, thresh, iterations=2)
-ret, thresh = cv2.threshold(thresh, 127, 255, cv2.THRESH_BINARY_INV)
+ret, thresh = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY_INV)
 
 if OPENCV_MAJOR_VERSION >= 4:
     # OpenCV 4 or a later version is being used.
@@ -88,20 +61,27 @@ for c in contours:
 
     r = cv2.boundingRect(c)
     is_inside = False
-    for q in rectangles:
+    for i, q in enumerate(rectangles):
         if inside(r, q):
+            is_inside = True
+            break
+        if overlape(r, q):
+            x1, y1, w1, h1 = r
+            x2, y2, w2, h2 = q 
+            x_new = min(x1, x2)
+            y_new = min(y1, y2)
+            w_new = max(x1+w1, x2+w2) - x_new
+            h_new = max(y1+h1, y2+h2) - y_new
+            rectangles[i] = (x_new, y_new, w_new, h_new)
             is_inside = True
             break
     if not is_inside:
         rectangles.append(r)
 
 for r in rectangles:
-    x, y, w, h = wrap_digit(r, img_w, img_h)
+    x, y, w, h = r
     roi = thresh[y:y+h, x:x+w]
+    roi = padd_symbol(roi)
+    cv2.imshow("roi", roi)
+    cv2.waitKey()
     cv2.rectangle(img, (x,y), (x+w, y+h), (255, 0, 0), 2)
-
-cv2.imwrite("detected_and_classified_digits_thresh.png", thresh)
-cv2.imwrite("detected_and_classified_digits.png", img)
-cv2.imshow("thresh", gray)
-cv2.imshow("detected and classified digits", img)
-cv2.waitKey()
