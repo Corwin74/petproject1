@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os
-
+import model_cnn
 
 OPENCV_MAJOR_VERSION = int(cv2.__version__.split('.')[0])
 
@@ -78,10 +78,16 @@ for c in contours:
     if not is_inside:
         rectangles.append(r)
 
+roi_list = []
 for r in rectangles:
     x, y, w, h = r
     roi = thresh[y:y+h, x:x+w]
     roi = padd_symbol(roi)
     cv2.imshow("roi", roi)
+    roi_list.append(model_cnn.normalize(roi))
     cv2.waitKey()
     cv2.rectangle(img, (x,y), (x+w, y+h), (255, 0, 0), 2)
+
+img_vec = np.stack(roi_list, axis=0)
+for each in model_cnn.predict(img_vec):
+    print(np.argmax(each))
