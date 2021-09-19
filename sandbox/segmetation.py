@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import model_cnn
+import svm_inference
 
 OPENCV_MAJOR_VERSION = int(cv2.__version__.split('.')[0])
 
@@ -90,4 +91,7 @@ for r in rectangles:
 
 img_vec = np.stack(roi_list, axis=0)
 for each in model_cnn.predict(img_vec):
-    print(np.argmax(each))
+    print("CNN:", np.argmax(each))
+
+for each in svm_inference.predict(img_vec.reshape(-1, 784)):
+    print("SVM:", each)
